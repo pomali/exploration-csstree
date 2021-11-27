@@ -1,4 +1,4 @@
-import csstree from "css-tree";
+import csstree, { CssNode } from "css-tree";
 
 interface Comment {
   value: string;
@@ -79,7 +79,7 @@ function createOnWalk(sortedComments: Accumulator) {
   };
 }
 
-export function parseWithComments(input: string, options: {} = {}) {
+export function parseWithComments(input: string, options: {} = {}): CssNode {
   const [acc, onComment] = createOnComment();
   const ast = csstree.parse(input, {
     ...options,

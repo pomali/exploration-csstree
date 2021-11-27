@@ -59,6 +59,14 @@
 }`,
 
 `selector {
+    display: 
+    /* Lorem */
+    none;
+    border: 1px /* dolor */ solid /* ipsum */ white;
+    margin: 1em;
+}`,
+
+`selector {
     /* Lorem */
     display: none;
     margin: 1em;
@@ -76,8 +84,22 @@ selector {
     margin: 1em;
 }`,
 
+`/* Before */ selector {    
+    display: none;
+    margin: 1em;
+}`,
+
 `/* Lorem 
     multiline */
+selector {    
+    display: none;
+    margin: 1em;
+}`,
+
+`/* Lorem 
+    multiline */
+/* One */ /* Two */
+/* Three */
 selector {    
     display: none;
     margin: 1em;
