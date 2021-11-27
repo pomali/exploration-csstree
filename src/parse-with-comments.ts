@@ -27,7 +27,7 @@ function matchCommentEnter(
   nodeLoc: csstree.CssLocation | undefined,
   commentLoc: csstree.CssLocation
 ) {
-  return !!nodeLoc && commentLoc.start.offset < nodeLoc.start.offset;
+  return !!nodeLoc && (commentLoc.start.offset < nodeLoc.start.offset || commentLoc.start.line === nodeLoc.start.line);
 }
 
 function matchCommentLeave(
