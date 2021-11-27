@@ -16,14 +16,14 @@ function createOnComment(): [
 
 
 
-export function parseWithComments(input: string) {
+export function parseWithComments(input: string, options: {}) {
   const [acc, onComment] = createOnComment();
-  const ast = csstree.parse(input, {
+  const ast = csstree.parse(input, {...options, ...{
     onComment,
     positions: true,
-  });
+  }});
 
-  console.log(acc);
+  console.log('Comments', acc);
 }
 
 export default parseWithComments;
