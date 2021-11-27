@@ -1,7 +1,6 @@
 import { StyleSheet, generate } from "css-tree";
 import parseWithComments from "../src/parse-with-comments";
 
-
 test("should parse comments before declarations", () => {
   const css = 
 `selector1, div > selector2::after {
@@ -13,6 +12,19 @@ test("should parse comments before declarations", () => {
   const ast = parseWithComments(css) as StyleSheet;
   expect( getEntity(ast, {rule: 0, block: true, declaration: 0 }).comments ).toEqual(['Lorem']);
   expect( getEntity(ast, {rule: 0, block: true, declaration: 1 }).comments ).toEqual(['ipsum']);  
+});
+
+
+xtest("should parse comments in line with declarations", () => {
+  const css = 
+`selector {
+    /* Lorem */
+    display: none; /* ipsum */
+    margin: 1em;
+}`;
+  const ast = parseWithComments(css) as StyleSheet;
+  expect( getEntity(ast, {rule: 0, block: true, declaration: 0 }).comments ).toEqual(['Lorem', 'ipsum']);
+  expect( getEntity(ast, {rule: 0, block: true, declaration: 1 }).comments ).toBeUndefined();  
 });
 
 
