@@ -16,7 +16,7 @@ function createOnComment(): [
 
 
 
-export function parseWithComments(input: string, options: {}) {
+export function parseWithComments(input: string, options: {} = {}) {
   const [acc, onComment] = createOnComment();
   const ast = csstree.parse(input, {...options, ...{
     onComment,
