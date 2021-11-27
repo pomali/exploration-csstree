@@ -147,6 +147,16 @@ xtest("should parse comments on the end of declaration block", () => {
   expect( getEntity(ast, {rule: 0 }).comments ).toBeUndefined();
 });
 
+xtest("should parse comments in one liner declaration", () => {
+  const css = `selector { /* One liner */ display: none; border: 1px /* dolor */ solid /* ipsum */ white; margin: 1em; }`;
+  const ast = parseWithComments(css) as StyleSheet;
+  expect( getEntity(ast, {rule: 0, block: true, declaration: 0 }).comments ).toEqual(['One liner']);
+  expect( getEntity(ast, {rule: 0, block: true, declaration: 1 }).comments ).toEqual(['dolor', 'ipsum']);
+  expect( getEntity(ast, {rule: 0, block: true, declaration: 2 }).comments ).toBeUndefined();
+  expect( getEntity(ast, {rule: 0, block: true }).comments ).toBeUndefined();  
+  expect( getEntity(ast, {rule: 0 }).comments ).toBeUndefined();
+});
+
 
 
 test("prase comments block after", () => {
