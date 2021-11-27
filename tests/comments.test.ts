@@ -1,152 +1,206 @@
 import { StyleSheet, generate, toPlainObject } from "css-tree";
 import parseWithComments from "../src/parse-with-comments";
 
-test("should parse comments before declarations", () => {
-  const css = 
-`selector1, div > selector2::after {
-    /* Lorem */
+describe('declaration comments', ()=>{
+
+  test("should parse comments before declarations", () => {
+    const css = 
+  `selector1, div > selector2::after {
+      /* Lorem */
+      display: none;
+      /* ipsum */
+      margin: 1em;
+  }`;
+    const ast = parseWithComments(css) as StyleSheet;
+    expect( getEntity(ast, {rule: 0, block: true, declaration: 0 }).comments ).toEqual(['Lorem']);
+    expect( getEntity(ast, {rule: 0, block: true, declaration: 1 }).comments ).toEqual(['ipsum']);  
+  });
+
+
+  test("should parse comments in line with declarations", () => {
+    const css = 
+  `selector {
+      /* Lorem */
+      display: none; /* ipsum */
+      margin: 1em;
+  }`;
+    const ast = parseWithComments(css) as StyleSheet;
+    expect( getEntity(ast, {rule: 0, block: true, declaration: 0 }).comments ).toEqual(['Lorem', 'ipsum']);
+    expect( getEntity(ast, {rule: 0, block: true, declaration: 1 }).comments ).toBeUndefined();  
+  });
+
+  test("should parse comments in line and in the middle of declarations", () => {
+    const css = 
+  `selector {
+      /* Lorem */
+      display/* dolor */: none; /* ipsum */
+      margin: 1em;
+  }`;
+    const ast = parseWithComments(css) as StyleSheet;
+    expect( getEntity(ast, {rule: 0, block: true, declaration: 0 }).comments ).toEqual(['Lorem', 'dolor', 'ipsum']);
+    expect( getEntity(ast, {rule: 0, block: true, declaration: 1 }).comments ).toBeUndefined();  
+  });
+
+  test("should parse comments in line and in the middle of declarations (multiline)", () => {
+    const css = 
+  `selector {
+      /* Lorem */
+      display/* dolor */: none; /* ipsum
+      multiline */
+      margin: 1em;
+  }`;
+    const ast = parseWithComments(css) as StyleSheet;
+    expect( getEntity(ast, {rule: 0, block: true, declaration: 0 }).comments ).toEqual(['Lorem', 'dolor', 'ipsum\n    multiline']);
+    expect( getEntity(ast, {rule: 0, block: true, declaration: 1 }).comments ).toBeUndefined();  
+  });
+
+  test("should parse comments before declarations (multiline)", () => {
+    const css = 
+  `selector {
+      /* Lorem
+      multiline */
+      display/* dolor */: none; /* ipsum */
+      margin: 1em;
+  }`;
+    const ast = parseWithComments(css) as StyleSheet;
+    expect( getEntity(ast, {rule: 0, block: true, declaration: 0 }).comments ).toEqual(['Lorem\n    multiline', 'dolor', 'ipsum']);
+    expect( getEntity(ast, {rule: 0, block: true, declaration: 1 }).comments ).toBeUndefined();  
+  });
+
+  xtest("should parse comments in line and in the middle of declarations (2)", () => {
+    const css = 
+  `selector {
+      /* Lorem */
+      display: /* dolor */none; /* ipsum */
+      margin: 1em;
+  }`;
+    const ast = parseWithComments(css) as StyleSheet;
+    expect( getEntity(ast, {rule: 0, block: true, declaration: 0 }).comments ).toEqual(['Lorem', 'dolor', 'ipsum']);
+    expect( getEntity(ast, {rule: 0, block: true, declaration: 1 }).comments ).toBeUndefined();  
+  });
+
+  xtest("should parse comments in line and in the middle of declarations (3)", () => {
+    const css = 
+  `selector {
+      /* Lorem */
+      display: none/* dolor */; /* ipsum */
+      margin: 1em;
+  }`;
+    const ast = parseWithComments(css) as StyleSheet;
+    expect( getEntity(ast, {rule: 0, block: true, declaration: 0 }).comments ).toEqual(['Lorem', 'dolor', 'ipsum']);
+    expect( getEntity(ast, {rule: 0, block: true, declaration: 1 }).comments ).toBeUndefined();  
+  });
+
+  xtest("should parse comments in line and before declarations", () => {
+    const css = 
+  `selector {
+      border: 0;
+      /* Lorem */
+      /* before */ display: none; /* ipsum */
+      margin: 1em;
+  }`;
+    const ast = parseWithComments(css) as StyleSheet;
+    expect( getEntity(ast, {rule: 0, block: true, declaration: 0 }).comments ).toBeUndefined();  
+    expect( getEntity(ast, {rule: 0, block: true, declaration: 1 }).comments ).toEqual(['Lorem', 'before', 'ipsum']);
+    expect( getEntity(ast, {rule: 0, block: true, declaration: 2 }).comments ).toBeUndefined();  
+  });
+
+  xtest("should parse comments in line and in the middle of declarations (4)", () => {
+    const css = 
+  `selector {
+      /* Lorem */
+      display: none;
+      border: 1px /* dolor */ solid /* ipsum */ white;
+      margin: 1em;
+  }`;
+    const ast = parseWithComments(css) as StyleSheet;
+    expect( getEntity(ast, {rule: 0, block: true, declaration: 0 }).comments ).toEqual(['Lorem']);
+    expect( getEntity(ast, {rule: 0, block: true, declaration: 1 }).comments ).toEqual(['dolor', 'ipsum']);
+    expect( getEntity(ast, {rule: 0, block: true, declaration: 2 }).comments ).toBeUndefined();  
+  });
+
+  xtest("should parse comments in between lines of one declaration", () => {
+    const css = 
+  `selector {
+      display: 
+      /* Lorem */
+      none;
+      border: 1px /* dolor */ solid /* ipsum */ white;
+      margin: 1em;
+  }`;
+    const ast = parseWithComments(css) as StyleSheet;
+    expect( getEntity(ast, {rule: 0, block: true, declaration: 0 }).comments ).toEqual(['Lorem']);
+    expect( getEntity(ast, {rule: 0, block: true, declaration: 1 }).comments ).toEqual(['dolor', 'ipsum']);
+    expect( getEntity(ast, {rule: 0, block: true, declaration: 2 }).comments ).toBeUndefined();  
+  });
+
+  xtest("should parse comments on the end of declaration block", () => {
+    const css = 
+  `selector {
+      /* Lorem */
+      display: none;
+      margin: 1em;
+      /* under */
+  }`;
+    const ast = parseWithComments(css) as StyleSheet;
+    expect( getEntity(ast, {rule: 0, block: true, declaration: 0 }).comments ).toEqual(['Lorem']);
+    expect( getEntity(ast, {rule: 0, block: true, declaration: 1 }).comments ).toEqual(['under']);
+    expect( getEntity(ast, {rule: 0, block: true }).comments ).toBeUndefined();  
+    expect( getEntity(ast, {rule: 0 }).comments ).toBeUndefined();
+  });
+
+  xtest("should parse comments in one liner declaration", () => {
+    const css = `selector { /* One liner */ display: none; border: 1px /* dolor */ solid /* ipsum */ white; margin: 1em; }`;
+    const ast = parseWithComments(css) as StyleSheet;
+    expect( getEntity(ast, {rule: 0, block: true, declaration: 0 }).comments ).toEqual(['One liner']);
+    expect( getEntity(ast, {rule: 0, block: true, declaration: 1 }).comments ).toEqual(['dolor', 'ipsum']);
+    expect( getEntity(ast, {rule: 0, block: true, declaration: 2 }).comments ).toBeUndefined();
+    expect( getEntity(ast, {rule: 0, block: true }).comments ).toBeUndefined();  
+    expect( getEntity(ast, {rule: 0 }).comments ).toBeUndefined();
+  });
+
+});
+
+
+describe('selector comments', ()=>{
+
+  xtest("should parse comments above selector", () => {
+    const css = 
+`/* Lorem */
+selector {    
     display: none;
-    /* ipsum */
     margin: 1em;
 }`;
-  const ast = parseWithComments(css) as StyleSheet;
-  expect( getEntity(ast, {rule: 0, block: true, declaration: 0 }).comments ).toEqual(['Lorem']);
-  expect( getEntity(ast, {rule: 0, block: true, declaration: 1 }).comments ).toEqual(['ipsum']);  
-});
+    const ast = parseWithComments(css) as StyleSheet;
+    expect( getEntity(ast, {rule: 0, selectorList: true }).comments ).toEqual(['Lorem']);
+    expect( getEntity(ast, {rule: 0, selectorList: true, selector: 0 }).comments ).toBeUndefined();
+  });
 
-
-test("should parse comments in line with declarations", () => {
-  const css = 
-`selector {
-    /* Lorem */
-    display: none; /* ipsum */
+    xtest("should parse comments before selector", () => {
+    const css = 
+`/* Before */ selector {    
+    display: none;
     margin: 1em;
 }`;
-  const ast = parseWithComments(css) as StyleSheet;
-  expect( getEntity(ast, {rule: 0, block: true, declaration: 0 }).comments ).toEqual(['Lorem', 'ipsum']);
-  expect( getEntity(ast, {rule: 0, block: true, declaration: 1 }).comments ).toBeUndefined();  
-});
+    const ast = parseWithComments(css) as StyleSheet;
+    expect( getEntity(ast, {rule: 0, selectorList: true }).comments ).toEqual(['Before']);
+    expect( getEntity(ast, {rule: 0, selectorList: true, selector: 0 }).comments ).toBeUndefined();
+  });
 
-test("should parse comments in line and in the middle of declarations", () => {
-  const css = 
-`selector {
-    /* Lorem */
-    display/* dolor */: none; /* ipsum */
-    margin: 1em;
-}`;
-  const ast = parseWithComments(css) as StyleSheet;
-  expect( getEntity(ast, {rule: 0, block: true, declaration: 0 }).comments ).toEqual(['Lorem', 'dolor', 'ipsum']);
-  expect( getEntity(ast, {rule: 0, block: true, declaration: 1 }).comments ).toBeUndefined();  
-});
-
-test("should parse comments in line and in the middle of declarations (multiline)", () => {
-  const css = 
-`selector {
-    /* Lorem */
-    display/* dolor */: none; /* ipsum
+  xtest("should parse comments above selector (multiline)", () => {
+    const css = 
+`/* Lorem 
     multiline */
-    margin: 1em;
-}`;
-  const ast = parseWithComments(css) as StyleSheet;
-  expect( getEntity(ast, {rule: 0, block: true, declaration: 0 }).comments ).toEqual(['Lorem', 'dolor', 'ipsum\n    multiline']);
-  expect( getEntity(ast, {rule: 0, block: true, declaration: 1 }).comments ).toBeUndefined();  
-});
-
-test("should parse comments before declarations (multiline)", () => {
-  const css = 
-`selector {
-    /* Lorem
-    multiline */
-    display/* dolor */: none; /* ipsum */
-    margin: 1em;
-}`;
-  const ast = parseWithComments(css) as StyleSheet;
-  expect( getEntity(ast, {rule: 0, block: true, declaration: 0 }).comments ).toEqual(['Lorem\n    multiline', 'dolor', 'ipsum']);
-  expect( getEntity(ast, {rule: 0, block: true, declaration: 1 }).comments ).toBeUndefined();  
-});
-
-test("should parse comments in line and in the middle of declarations (2)", () => {
-  const css = 
-`selector {
-    /* Lorem */
-    display: /* dolor */none; /* ipsum */
-    margin: 1em;
-}`;
-  const ast = parseWithComments(css) as StyleSheet;
-  expect( getEntity(ast, {rule: 0, block: true, declaration: 0 }).comments ).toEqual(['Lorem', 'dolor', 'ipsum']);
-  expect( getEntity(ast, {rule: 0, block: true, declaration: 1 }).comments ).toBeUndefined();  
-});
-
-test("should parse comments in line and in the middle of declarations (3)", () => {
-  const css = 
-`selector {
-    /* Lorem */
-    display: none/* dolor */; /* ipsum */
-    margin: 1em;
-}`;
-  const ast = parseWithComments(css) as StyleSheet;
-  expect( getEntity(ast, {rule: 0, block: true, declaration: 0 }).comments ).toEqual(['Lorem', 'dolor', 'ipsum']);
-  expect( getEntity(ast, {rule: 0, block: true, declaration: 1 }).comments ).toBeUndefined();  
-});
-
-test("should parse comments in line and before declarations", () => {
-  const css = 
-`selector {
-    border: 0;
-    /* Lorem */
-    /* before */ display: none; /* ipsum */
-    margin: 1em;
-}`;
-  const ast = parseWithComments(css) as StyleSheet;
-  expect( getEntity(ast, {rule: 0, block: true, declaration: 0 }).comments ).toBeUndefined();  
-  expect( getEntity(ast, {rule: 0, block: true, declaration: 1 }).comments ).toEqual(['Lorem', 'before', 'ipsum']);
-  expect( getEntity(ast, {rule: 0, block: true, declaration: 2 }).comments ).toBeUndefined();  
-});
-
-test("should parse comments in line and in the middle of declarations (4)", () => {
-  const css = 
-`selector {
-    /* Lorem */
-    display: none;
-    border: 1px /* dolor */ solid /* ipsum */ white;
-    margin: 1em;
-}`;
-  const ast = parseWithComments(css) as StyleSheet;
-  expect( getEntity(ast, {rule: 0, block: true, declaration: 0 }).comments ).toEqual(['Lorem']);
-  expect( getEntity(ast, {rule: 0, block: true, declaration: 1 }).comments ).toEqual(['dolor', 'ipsum']);
-  expect( getEntity(ast, {rule: 0, block: true, declaration: 2 }).comments ).toBeUndefined();  
-});
-
-test("should parse comments in between lines of one declaration", () => {
-  const css = 
-`selector {
-    display: 
-    /* Lorem */
-    none;
-    border: 1px /* dolor */ solid /* ipsum */ white;
-    margin: 1em;
-}`;
-  const ast = parseWithComments(css) as StyleSheet;
-  expect( getEntity(ast, {rule: 0, block: true, declaration: 0 }).comments ).toEqual(['Lorem']);
-  expect( getEntity(ast, {rule: 0, block: true, declaration: 1 }).comments ).toEqual(['dolor', 'ipsum']);
-  expect( getEntity(ast, {rule: 0, block: true, declaration: 2 }).comments ).toBeUndefined();  
-});
-
-test("should parse comments on the end of declaration block", () => {
-  const css = 
-`selector {
-    /* Lorem */
+selector {    
     display: none;
     margin: 1em;
-    /* under */
 }`;
-  const ast = parseWithComments(css) as StyleSheet;
-  expect( getEntity(ast, {rule: 0, block: true, declaration: 0 }).comments ).toEqual(['Lorem']);
-  expect( getEntity(ast, {rule: 0, block: true, declaration: 1 }).comments ).toEqual(['under']);
-  expect( getEntity(ast, {rule: 0, block: true }).comments ).toBeUndefined();  
-  expect( getEntity(ast, {rule: 0 }).comments ).toBeUndefined();
-});
+    const ast = parseWithComments(css) as StyleSheet;
+    expect( getEntity(ast, {rule: 0, selectorList: true }).comments ).toEqual(['Lorem\n    multiline']);
+    expect( getEntity(ast, {rule: 0, selectorList: true, selector: 0 }).comments ).toBeUndefined();
+  });
 
+});
 
 
 test("prase comments block after", () => {
