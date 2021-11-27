@@ -278,73 +278,111 @@ selector3
 });
 
 
+describe('at-rules comments', ()=>{
 
-// test("prase comments block after", () => {
-//   const input = `.red {
-//           color: red;
-//           /* this is comment */
-//       }`;
-//   parseWithComments(input);
-// });
+  test("should parse comment before media query", () => {
+    const css = 
+`/* Lorem */
+@media all and (min-width: 500px) {
+    selector {    
+        display: none;
+        margin: 1em;
+    }
+}`;
+    const ast = parseWithComments(css) as StyleSheet;
+    expect( getEntity(ast, {rule: 0 }).comments ).toEqual(['Lorem']);
+  }); 
 
-// test("prase comments block after in line 1", () => {
-//   const input = `.red {
-//             color: red; /* this is comment */
-//         }`;
-//   parseWithComments(input);
-// });
+  test("should parse comment before and inside the media query", () => {
+    const css = 
+`/* Lorem */
+@media all and /* ipsum */ (min-width: 500px) {
+    selector {    
+        display: none;
+        margin: 1em;
+    }
+}`;
+    const ast = parseWithComments(css) as StyleSheet;
+    expect( getEntity(ast, {rule: 0 }).comments ).toEqual(['Lorem', 'ipsum']);
+  }); 
 
-// test("prase comments block after in line 2", () => {
-//   const input = `.red {
-//             color: /* this is comment */ red; 
-//         }`;
-//   parseWithComments(input);
-// });
+  test("should parse comment before and below the media query", () => {
+    const css = 
+`/* Lorem */
+@media all and (min-width: 500px) 
+/* below */
+{
+    selector {    
+        display: none;
+        margin: 1em;
+    }
+}`;
+    const ast = parseWithComments(css) as StyleSheet;
+    expect( getEntity(ast, {rule: 0 }).comments ).toEqual(['Lorem', 'below']);
+  }); 
 
-// test("prase comments block after in line 3", () => {
-//   const input = `.red {
-//               color/* this is comment */:  red; 
-//           }`;
-//   parseWithComments(input);
-// });
+  test("should parse comment in nested media queries", () => {
+    const css = 
+`/* Lorem */
+@media all and (min-width: 500px) 
+{
+    /* ipsum */
+    @media only screen and (min-width: 600px) { /* dolor */
+        selector {    
+            display: none;
+            margin: 1em;
+        }
+    }
+}`;
+    const ast = parseWithComments(css) as StyleSheet;
+    expect( getEntity(ast, {rule: 0 }).comments ).toEqual(['Lorem']);
+    expect( getEntity(getEntity(ast, {rule: 0 }), {rule: 0 }).comments ).toEqual(['ipsum', 'dolor']);
+  }); 
 
-// test("prase comments block after in line 4", () => {
-//   const input = `.red {
-//           /* this is comment */color:  red; 
-//           }`;
-//   parseWithComments(input);
-// });
+  test("should parse comment before and inside the media query (2)", () => {
+    const css = 
+`/* Lorem */
+@media screen /* 1 */ and (min-width: 30em) /* 2 */ and (orientation: landscape) /* 3 */
+{
+    selector {    
+        display: none;
+        margin: 1em;
+    }
+}`;
+    const ast = parseWithComments(css) as StyleSheet;
+    expect( getEntity(ast, {rule: 0 }).comments ).toEqual(['Lorem', '1', '2', '3']);
+  }); 
 
-// test("prase comments block before", () => {
-//   const input = `.red {
-//       /* this is comment */
-//             color: red;
-//         }`;
-//   parseWithComments(input);
-// });
+  test("should parse comment before and inside the media query (3)", () => {
+    const css = 
+`/* Lorem */
+@media (min-height: 680px), /* ipsum */ screen and (orientation: portrait) /* dolor */ {
+    selector {    
+        display: none;
+        margin: 1em;
+    }
+}`;
+    const ast = parseWithComments(css) as StyleSheet;
+    expect( getEntity(ast, {rule: 0 }).comments ).toEqual(['Lorem', 'ipsum', 'dolor']);
+  }); 
 
-// test("prase comments selector 1", () => {
-//   const input = `.red /* this is comment */ {
-//               color: red;
-//           }`;
-//   parseWithComments(input);
-// });
+  test("should parse comment in nested media queries (2)", () => {
+    const css = 
+`/* Lorem */
+@media (prefers-color-scheme) /* ipsum */ {
+    /* Dolor */
+    @supports /* igitum */ (-webkit-touch-callout: none) {
+        video {
+            -webkit-tap-highlight-color: transparent;
+        }
+    }
+}`;
+    const ast = parseWithComments(css) as StyleSheet;
+    expect( getEntity(ast, {rule: 0 }).comments ).toEqual(['Lorem', 'ipsum']);
+    expect( getEntity(getEntity(ast, {rule: 0 }), {rule: 0 }).comments ).toEqual(['Dolor', 'igitum']);
+  }); 
 
-// test("prase comments selector 2", () => {
-//   const input = `/* this is comment */.red  {
-//               color: red;
-//           }`;
-//   parseWithComments(input);
-// });
-
-// test("prase comments before", () => {
-//   const input = `/* this is comment */
-//       .red  {
-//               color: red;
-//           }`;
-//   parseWithComments(input);
-// });
-
+});
 
 interface EntityIndexes {
   rule: number;
@@ -386,4 +424,6 @@ function getEntity(ast: StyleSheet, which: EntityIndexes) {
   if (which.rule!==undefined) {
     return ast.children.toArray()[which.rule];
   }
+
+  return ast;
 }
