@@ -65,7 +65,57 @@ test("should parse comments before declarations (multiline)", () => {
   expect( getEntity(ast, {rule: 0, block: true, declaration: 1 }).comments ).toBeUndefined();  
 });
 
+xtest("should parse comments in line and in the middle of declarations (2)", () => {
+  const css = 
+`selector {
+    /* Lorem */
+    display: /* dolor */none; /* ipsum */
+    margin: 1em;
+}`;
+  const ast = parseWithComments(css) as StyleSheet;
+  expect( getEntity(ast, {rule: 0, block: true, declaration: 0 }).comments ).toEqual(['Lorem', 'dolor', 'ipsum']);
+  expect( getEntity(ast, {rule: 0, block: true, declaration: 1 }).comments ).toBeUndefined();  
+});
 
+xtest("should parse comments in line and in the middle of declarations (3)", () => {
+  const css = 
+`selector {
+    /* Lorem */
+    display: none/* dolor */; /* ipsum */
+    margin: 1em;
+}`;
+  const ast = parseWithComments(css) as StyleSheet;
+  expect( getEntity(ast, {rule: 0, block: true, declaration: 0 }).comments ).toEqual(['Lorem', 'dolor', 'ipsum']);
+  expect( getEntity(ast, {rule: 0, block: true, declaration: 1 }).comments ).toBeUndefined();  
+});
+
+xtest("should parse comments in line and before declarations", () => {
+  const css = 
+`selector {
+    border: 0;
+    /* Lorem */
+    /* before */ display: none; /* ipsum */
+    margin: 1em;
+}`;
+  const ast = parseWithComments(css) as StyleSheet;
+  expect( getEntity(ast, {rule: 0, block: true, declaration: 0 }).comments ).toBeUndefined();  
+  expect( getEntity(ast, {rule: 0, block: true, declaration: 1 }).comments ).toEqual(['Lorem', 'before', 'ipsum']);
+  expect( getEntity(ast, {rule: 0, block: true, declaration: 2 }).comments ).toBeUndefined();  
+});
+
+xtest("should parse comments in line and in the middle of declarations (4)", () => {
+  const css = 
+`selector {
+    /* Lorem */
+    display: none;
+    border: 1px /* dolor */ solid /* ipsum */ white;
+    margin: 1em;
+}`;
+  const ast = parseWithComments(css) as StyleSheet;
+  expect( getEntity(ast, {rule: 0, block: true, declaration: 0 }).comments ).toEqual(['Lorem']);
+  expect( getEntity(ast, {rule: 0, block: true, declaration: 1 }).comments ).toEqual(['dolor', 'ipsum']);
+  expect( getEntity(ast, {rule: 0, block: true, declaration: 2 }).comments ).toBeUndefined();  
+});
 
 
 test("prase comments block after", () => {
