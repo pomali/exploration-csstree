@@ -1,4 +1,4 @@
-import { StyleSheet, generate } from "css-tree";
+import { StyleSheet, generate, toPlainObject } from "css-tree";
 import parseWithComments from "../src/parse-with-comments";
 
 test("should parse comments before declarations", () => {
@@ -65,7 +65,7 @@ test("should parse comments before declarations (multiline)", () => {
   expect( getEntity(ast, {rule: 0, block: true, declaration: 1 }).comments ).toBeUndefined();  
 });
 
-xtest("should parse comments in line and in the middle of declarations (2)", () => {
+test("should parse comments in line and in the middle of declarations (2)", () => {
   const css = 
 `selector {
     /* Lorem */
@@ -77,7 +77,7 @@ xtest("should parse comments in line and in the middle of declarations (2)", () 
   expect( getEntity(ast, {rule: 0, block: true, declaration: 1 }).comments ).toBeUndefined();  
 });
 
-xtest("should parse comments in line and in the middle of declarations (3)", () => {
+test("should parse comments in line and in the middle of declarations (3)", () => {
   const css = 
 `selector {
     /* Lorem */
@@ -89,7 +89,7 @@ xtest("should parse comments in line and in the middle of declarations (3)", () 
   expect( getEntity(ast, {rule: 0, block: true, declaration: 1 }).comments ).toBeUndefined();  
 });
 
-xtest("should parse comments in line and before declarations", () => {
+test("should parse comments in line and before declarations", () => {
   const css = 
 `selector {
     border: 0;
@@ -103,7 +103,7 @@ xtest("should parse comments in line and before declarations", () => {
   expect( getEntity(ast, {rule: 0, block: true, declaration: 2 }).comments ).toBeUndefined();  
 });
 
-xtest("should parse comments in line and in the middle of declarations (4)", () => {
+test("should parse comments in line and in the middle of declarations (4)", () => {
   const css = 
 `selector {
     /* Lorem */
@@ -117,7 +117,7 @@ xtest("should parse comments in line and in the middle of declarations (4)", () 
   expect( getEntity(ast, {rule: 0, block: true, declaration: 2 }).comments ).toBeUndefined();  
 });
 
-xtest("should parse comments in between lines of one declaration", () => {
+test("should parse comments in between lines of one declaration", () => {
   const css = 
 `selector {
     display: 
@@ -132,7 +132,7 @@ xtest("should parse comments in between lines of one declaration", () => {
   expect( getEntity(ast, {rule: 0, block: true, declaration: 2 }).comments ).toBeUndefined();  
 });
 
-xtest("should parse comments on the end of declaration block", () => {
+test("should parse comments on the end of declaration block", () => {
   const css = 
 `selector {
     /* Lorem */
