@@ -384,6 +384,32 @@ describe('at-rules comments', ()=>{
 
 });
 
+describe('inline style comments', ()=>{
+
+  test("should parse comment in inline style", () => {
+    const css = `/* Lorem */display: /*ipsum*/ none; margin: 1em;`;
+    const ast = parseWithComments(css, { context: 'declarationList' }) as StyleSheet;
+    expect( getEntity(ast, {rule: 0 }).comments ).toEqual(['Lorem', 'ipsum']);
+    expect( getEntity(ast, {rule: 1 }).comments ).toBeUndefined();
+  }); 
+
+  test("should parse comment in inline style", () => {
+    const css = `display: none; /* Lorem */background: /* dolor */ red, /* ipsum */green, /* before */ blue /* after */!important /* end */; margin: 1em;`;
+    const ast = parseWithComments(css, { context: 'declarationList' }) as StyleSheet;
+    expect( getEntity(ast, {rule: 0 }).comments ).toBeUndefined();
+    expect( getEntity(ast, {rule: 1 }).comments ).toEqual(['Lorem', 'dolor', 'ipsum', 'before', 'after', 'end']);
+    expect( getEntity(ast, {rule: 2 }).comments ).toBeUndefined();
+  }); 
+
+  test("should parse comment in inline style without semicolon", () => {
+    const css = `display: none; margin: 1em /* after */`;
+    const ast = parseWithComments(css, { context: 'declarationList' }) as StyleSheet;
+    expect( getEntity(ast, {rule: 0 }).comments ).toBeUndefined();
+    expect( getEntity(ast, {rule: 1 }).comments ).toEqual(['after']);
+  }); 
+
+});
+
 interface EntityIndexes {
   rule: number;
     
