@@ -5,7 +5,7 @@ test("prase comments block after", () => {
           color: red;
           /* this is comment */
       }`;
-  parseWithComments(input);
+  const out = parseWithComments(input);
 });
 
 test("prase comments block after in line 1", () => {

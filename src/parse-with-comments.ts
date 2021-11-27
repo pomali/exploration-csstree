@@ -1,6 +1,10 @@
 import csstree from "css-tree";
 
-type Accumulator = Array<{ value: string; loc: csstree.CssLocation }>;
+interface Comment {
+  value: string;
+  loc: csstree.CssLocation;
+}
+type Accumulator = Array<Comment>;
 
 function createOnComment(): [
   Accumulator,
@@ -9,12 +13,16 @@ function createOnComment(): [
   const accumulator: Accumulator = [];
   function onComment(value: string, loc: csstree.CssLocation): void {
     accumulator.push({ value, loc });
-    console.log(loc);
   }
   return [accumulator, onComment];
 }
 
-
+function createOnWalk(sortedComments: Accumulator) {
+  let i = 0;
+  return function onWalk(node) {
+    console.log(node);
+  };
+}
 
 export function parseWithComments(input: string) {
   const [acc, onComment] = createOnComment();
@@ -23,7 +31,8 @@ export function parseWithComments(input: string) {
     positions: true,
   });
 
-  console.log(acc);
+  csstree.walk(ast, onWalk);
+  return ast;
 }
 
 export default parseWithComments;
