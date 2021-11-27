@@ -2,7 +2,7 @@ import { StyleSheet, generate } from "css-tree";
 import parseWithComments from "../src/parse-with-comments";
 
 
-test("shoud parse comments before declarations", () => {
+test("should parse comments before declarations", () => {
   const css = 
 `selector1, div > selector2::after {
     /* Lorem */
