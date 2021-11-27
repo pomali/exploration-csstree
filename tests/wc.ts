@@ -1,9 +1,11 @@
 import parseWithComments from "../src/parse-with-comments";
 
-const input = `.red {
+const input = `
+/* comment above */
+.red {
     color: red;
     /* this is comment */
 }`;
 
 const ast = parseWithComments(input);
-console.log(ast);
+console.log(JSON.stringify(ast, null, 2));
