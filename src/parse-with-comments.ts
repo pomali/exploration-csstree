@@ -1,5 +1,10 @@
 import csstree, { CssNode } from "css-tree";
 
+/* Types that are not parsed and their children are ignored too */
+const CUTOFF_TYPES = ['TypeSelector', 'Identifier']
+/* Types that can get comments attached */
+const ENABLED_TYPES = ['Rule', 'SelectorList', 'Selector', 'Block', 'Declaration']
+
 interface Comment {
   value: string;
   loc: csstree.CssLocation;
@@ -27,7 +32,11 @@ function matchCommentEnter(
   nodeLoc: csstree.CssLocation | undefined,
   commentLoc: csstree.CssLocation
 ) {
-  return !!nodeLoc && (commentLoc.start.offset < nodeLoc.start.offset || commentLoc.start.line === nodeLoc.start.line);
+  return (
+    !!nodeLoc &&
+    (commentLoc.start.offset < nodeLoc.start.offset ||
+      commentLoc.start.line === nodeLoc.start.line)
+  );
 }
 
 function matchCommentLeave(
@@ -45,9 +54,18 @@ function addComment(node: csstree.CssNode, commentValue: string) {
   }
 }
 
-function createOnWalk(sortedComments: Accumulator) {
+
+function createOnWalk(sortedComments: Accumulator): csstree.WalkOptions {
   let i = 0;
   const enter: csstree.EnterOrLeaveFn = function enter(node) {
+    if (node.type in CUTOFF_TYPES ){
+      return csstree.walk.skip;
+    };
+
+    // if (!(node.type in ENABLED_TYPES)){
+    //   return
+    // }
+
     while (i < sortedComments.length) {
       const currentComment = sortedComments[i];
       const matched = matchCommentEnter(node.loc, currentComment.loc);
@@ -61,6 +79,14 @@ function createOnWalk(sortedComments: Accumulator) {
   };
 
   const leave: csstree.EnterOrLeaveFn = function leave(node) {
+    if (node.type in CUTOFF_TYPES ){
+      return csstree.walk.skip;
+    };
+
+    // if (!(node.type in ENABLED_TYPES)){
+    //   return
+    // }
+
     while (i < sortedComments.length) {
       const currentComment = sortedComments[i];
       const matched = matchCommentLeave(node.loc, currentComment.loc);

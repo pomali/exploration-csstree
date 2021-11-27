@@ -12,6 +12,12 @@
       "program": "${workspaceFolder}/tests/wc.ts",
       "preLaunchTask": "tsc: build - tsconfig.json",
       "outFiles": ["${workspaceFolder}/out/**/*.js"]
+    },
+    {
+      "type": "node",
+      "request": "attach",
+      "name": "Attach",
+      "port": 9229
     }
   ]
 }
