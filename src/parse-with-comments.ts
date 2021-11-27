@@ -18,7 +18,7 @@ function createOnComment(): [
 ] {
   const accumulator: Accumulator = [];
   function onComment(value: string, loc: csstree.CssLocation): void {
-    accumulator.push({ value, loc });
+    accumulator.push({ value: value.trim(), loc });
   }
   return [accumulator, onComment];
 }
