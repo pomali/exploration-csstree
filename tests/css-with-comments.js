@@ -31,7 +31,6 @@
     margin: 1em;
 }`,
 
-
 `selector {
     /* Lorem */
     display: /* dolor */none; /* ipsum */
