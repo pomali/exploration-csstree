@@ -18,5 +18,8 @@
   "homepage": "https://github.com/pomali/exploration-csstree#readme",
   "dependencies": {
     "css-tree": "^1.1.3"
+  },
+  "devDependencies": {
+    "jest": "^27.3.1"
   }
 }
