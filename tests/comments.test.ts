@@ -2,20 +2,7 @@ import { StyleSheet, generate } from "css-tree";
 import parseWithComments from "../src/parse-with-comments";
 
 
-interface EntityIndexes {
-  rule: number;
-  selectorList?: boolean;
-  selector?: number;
-}
-
-function getEntity(ast: StyleSheet, which: EntityIndexes) {
-  if (which.selector!==undefined && which.selectorList==true && which.rule!==undefined) {
-    return ast.children.toArray()[which.rule].prelude.children.toArray()[which.selector];
-    // return ast.children.toArray()[which.rule].prelude.children.toArray()[which.selector];
-  }
-}
-
-test("shoud parse comments block after", () => {
+test("shoud parse comments before declarations", () => {
   const css = 
 `selector1, div > selector2::after {
     /* Lorem */
@@ -24,49 +11,8 @@ test("shoud parse comments block after", () => {
     margin: 1em;
 }`;
   const ast = parseWithComments(css) as StyleSheet;
-
-  // type: 'StyleSheet',
-  // start: { offset: 0, line: 1, column: 1 },
-  // end: { offset: 91, line: 6, column: 2 }
-  const stylesheet = ast;
-  
-    // type: 'Rule',
-    // start: { offset: 0, line: 1, column: 1 },
-    // end: { offset: 91, line: 6, column: 2 }
-    const firstRule = stylesheet.children.first(); // ast.children.first()
-    
-      // type: 'SelectorList',
-      // start: { offset: 0, line: 1, column: 1 },
-      // end: { offset: 19, line: 1, column: 20 }
-      const selectorList = firstRule.prelude; // ast.children.first().prelude
-
-        // type: 'Selector',
-        // start: { offset: 0, line: 1, column: 1 },
-        // end: { offset: 8, line: 1, column: 9 }
-        const list = selectorList.children.first(); // ast.children.first().prelude.children.first()
-
-        // ----------------------------------------------------------------------------------------------
-
-          // type: 'TypeSelector',
-          // name: 'selector'
-          // start: { offset: 0, line: 1, column: 1 },
-          // end: { offset: 8, line: 1, column: 9 }
-          const selector = list.children.first(); // ast.children.first().prelude.children.first().children.first()
-
-
-  console.log('XXXX: ', selectorList.children.first(), selectorList.children.getSize());
-  console.log('YYYY: ', selectorList.children.first().children.first(), selectorList.children.last().children.first());
-  console.log('ZZZZ: ', generate(selectorList.children.last()));
-  console.log('####: ', getEntity(ast, {rule: 0, selectorList: true, selector: 1}));
-  console.log('####: ', generate(getEntity(ast, {rule: 0, selectorList: true, selector: 1})));
-  // console.log('XXXX: ', ast.children.first().prelude.children.first());
-  // start: { offset: 0, line: 1, column: 1 },
-  // end: { offset: 80, line: 6, column: 2 }
-
-  // start: { offset: 0, line: 1, column: 1 },
-  // end: { offset: 8, line: 1, column: 9 }
-
-
+  expect( getEntity(ast, {rule: 0, block: true, declaration: 0 }).comments ).toEqual(['Lorem']);
+  expect( getEntity(ast, {rule: 0, block: true, declaration: 1 }).comments ).toEqual(['ipsum']);  
 });
 
 
@@ -143,3 +89,46 @@ test("prase comments block after", () => {
 //           }`;
 //   parseWithComments(input);
 // });
+
+
+interface EntityIndexes {
+  rule: number;
+    
+    selectorList?: boolean;
+      selector?: number;
+    
+    // or
+
+    block?: boolean;
+      declaration?: number;
+}
+
+/**
+ * 
+ * @example getEntity(ast, {rule: 0 })
+ * @example getEntity(ast, {rule: 0, selectorList: true })
+ * @example getEntity(ast, {rule: 0, selectorList: true, selector: 1 })
+ * @example getEntity(ast, {rule: 0, block: true })
+ * @example getEntity(ast, {rule: 0, block: true, declaration: 0 })
+ */
+function getEntity(ast: StyleSheet, which: EntityIndexes) {
+  if (which.selector!==undefined && which.selectorList==true && which.rule!==undefined) {
+    return ast.children.toArray()[which.rule].prelude.children.toArray()[which.selector];
+  }
+  
+  if (which.declaration!==undefined && which.block==true && which.rule!==undefined) {
+    return ast.children.toArray()[which.rule].block.children.toArray()[which.declaration];
+  }
+
+  if (which.selectorList==true && which.rule!==undefined) {
+    return ast.children.toArray()[which.rule].prelude;
+  }
+
+  if (which.block==true && which.rule!==undefined) {
+    return ast.children.toArray()[which.rule].block;
+  }
+
+  if (which.rule!==undefined) {
+    return ast.children.toArray()[which.rule];
+  }
+}
