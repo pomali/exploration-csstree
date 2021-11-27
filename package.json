@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/pomali/exploration-csstree/issues"
   },
-  "homepage": "https://github.com/pomali/exploration-csstree#readme"
+  "homepage": "https://github.com/pomali/exploration-csstree#readme",
+  "dependencies": {
+    "css-tree": "^1.1.3"
+  }
 }
